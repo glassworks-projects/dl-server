@@ -1,10 +1,15 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { response } from 'express';
 import { PythonShell } from 'python-shell';
 
-const NOT_FOUND = 'not found';
-const USED = 'used';
-const VALID = 'valid';
+const responses = {
+	NOT_FOUND: 'not found',
+	USED: 'used',
+	VALID: 'valid'
+}
+// const NOT_FOUND = 'not found';
+// const USED = 'used';
+// const VALID = 'valid';
 
 const bodyParser = require('body-parser');
 const app = express();
@@ -33,20 +38,20 @@ app.post("/python-test", (req, res) => {
 		options.args = [code]
 		const pyshell = new PythonShell('codes.py', options);
 
-		pyshell.on('message', function (message) {
-			// received a message sent from the Python script (a simple "print" statement)
+		pyshell.on('message', (message) => {
+
 			switch(message) {
-				case NOT_FOUND: {
+				case responses.NOT_FOUND: {
 					res.sendStatus(404);
 					break;
 				}
 
-				case USED: {
+				case responses.USED: {
 					res.status(403).send('Code already used');
 					break;
 				}
 
-				case VALID: {
+				case responses.VALID: {
 					res.sendFile(process.env.ASSET_PATH);
 					break;
 				}
@@ -61,7 +66,7 @@ app.post("/python-test", (req, res) => {
 		});
 		
 		// end the input stream and allow the process to exit
-		pyshell.end(function (err) {
+		pyshell.end((err) => {
 			if (err) throw err;
 		});
 	} else {
